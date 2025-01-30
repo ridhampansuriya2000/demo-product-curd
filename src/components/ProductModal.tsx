@@ -7,10 +7,10 @@ interface Product {
     title: string;
     description: string;
     category: string;
-    price: number;
+    price: number | undefined;
     discountPercentage: number;
     rating: number;
-    stock: number;
+    stock: number | undefined;
     tags: string[];
     brand: string;
     sku: string;
@@ -34,7 +34,7 @@ interface ProductModalProps {
     onSubmit: (product: Product) => void;
 }
 
-const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps) => {
+const ProductModal = ({ isOpen, onClose, product, onSubmit }: ProductModalProps) => {
     const [formData, setFormData] = useState<Product>({
         id: 0,
         title: '',
@@ -60,11 +60,24 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
         images: [],
     });
 
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
     useEffect(() => {
         if (product) {
             setFormData(product);
         }
     }, [product]);
+
+    const validateField = (name: string, value: any) => {
+        let error = "";
+
+        if (name === "title" && !value.trim()) error = "Title is required";
+        if (name === "description" && !value.trim()) error = "Description is required";
+        if (name === "price" && (value === undefined || value <= 0)) error = "Valid price is required";
+        if (name === "stock" && (value === undefined || value <= 0)) error = "Valid stock quantity is required";
+
+        return error;
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -72,9 +85,28 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
             ...prevState,
             [name]: value,
         }));
+
+        // Validate field on change
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [name]: validateField(name, value),
+        }));
     };
 
     const handleSubmit = () => {
+        let newErrors: { [key: string]: string } = {};
+
+        Object.keys(formData).forEach((key) => {
+            const value = (formData as any)[key];
+            const error = validateField(key, value);
+            if (error) newErrors[key] = error;
+        });
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         onSubmit(formData);
         onClose();
     };
@@ -95,6 +127,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
                                 onChange={handleChange}
                                 className="border p-2 w-full"
                             />
+                            {errors.title && <p className="text-red-500">{errors.title}</p>}
                         </div>
                         <div className="mb-4">
                             <label htmlFor="description" className="block">Description</label>
@@ -106,6 +139,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
                                 onChange={handleChange}
                                 className="border p-2 w-full"
                             />
+                            {errors.description && <p className="text-red-500">{errors.description}</p>}
                         </div>
                         <div className="mb-4">
                             <label htmlFor="price" className="block">Price</label>
@@ -117,6 +151,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
                                 onChange={handleChange}
                                 className="border p-2 w-full"
                             />
+                            {errors.price && <p className="text-red-500">{errors.price}</p>}
                         </div>
                         <div className="mb-4">
                             <label htmlFor="stock" className="block">Stock</label>
@@ -128,6 +163,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit } : ProductModalProps
                                 onChange={handleChange}
                                 className="border p-2 w-full"
                             />
+                            {errors.stock && <p className="text-red-500">{errors.stock}</p>}
                         </div>
                         <div className="flex justify-between">
                             <button
