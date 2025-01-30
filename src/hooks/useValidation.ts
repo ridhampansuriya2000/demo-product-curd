@@ -1,31 +1,17 @@
-import { useState } from 'react';
+interface SignUpFormData {
+    fullname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    mobile: string;
+}
 
 interface ValidationResult {
     isValid: boolean;
-    error: {
-        fullname: string;
-        email: string;
-        password: string;
-        confirmPassword: string;
-        mobile: string;
-    };
+    errorMessages: { [key: string]: string };
 }
 
 const useValidation = () => {
-    const [error, setError] = useState<{
-        fullname: string;
-        email: string;
-        password: string;
-        confirmPassword: string;
-        mobile: string;
-    }>({
-        fullname: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        mobile: '',
-    });
-
     const validateEmail = (email: string): boolean => {
         const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         return regex.test(email);
@@ -36,63 +22,44 @@ const useValidation = () => {
         return regex.test(password);
     };
 
-    const validateForm = (
-        fullname: string,
-        email: string,
-        password: string,
-        confirmPassword: string,
-        mobile: string
-    ): ValidationResult => {
+    const validateForm = (formData: SignUpFormData): ValidationResult => {
         let isValid = true;
-        const errorMessages = {
-            fullname: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            mobile: '',
-        };
+        const errorMessages: { [key: string]: string } = {};
 
-        if (!fullname) {
+        if (!formData.fullname) {
             isValid = false;
             errorMessages.fullname = 'Full name is required';
         }
-        if (!email) {
+        if (!formData.email) {
             isValid = false;
             errorMessages.email = 'Email is required';
+        } else if (!validateEmail(formData.email)) {
+            isValid = false;
+            errorMessages.email = 'Invalid email address';
         }
-        if (!password) {
+        if (!formData.password) {
             isValid = false;
             errorMessages.password = 'Password is required';
+        } else if (!validatePassword(formData.password)) {
+            isValid = false;
+            errorMessages.password = 'Password must be at least 8 characters, contain 1 uppercase, 1 lowercase, and 1 special character';
         }
-        if (!confirmPassword) {
+        if (!formData.confirmPassword) {
             isValid = false;
             errorMessages.confirmPassword = 'Confirm password is required';
+        } else if (formData.password !== formData.confirmPassword) {
+            isValid = false;
+            errorMessages.confirmPassword = 'Passwords do not match';
         }
-        if (!mobile) {
+        if (!formData.mobile) {
             isValid = false;
             errorMessages.mobile = 'Mobile number is required';
         }
 
-        if (email && !validateEmail(email)) {
-            isValid = false;
-            errorMessages.email = 'Invalid email address';
-        }
-        if (password && !validatePassword(password)) {
-            isValid = false;
-            errorMessages.password =
-                'Password must be at least 8 characters, contain 1 uppercase, 1 lowercase, and 1 special character';
-        }
-        if (password && confirmPassword && password !== confirmPassword) {
-            isValid = false;
-            errorMessages.confirmPassword = 'Passwords do not match';
-        }
-
-        setError(errorMessages);
-
-        return { isValid, error: errorMessages };
+        return { isValid, errorMessages };
     };
 
-    return { validateForm, error };
+    return { validateForm };
 };
 
 export default useValidation;
