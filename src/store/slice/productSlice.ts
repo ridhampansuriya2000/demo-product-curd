@@ -1,45 +1,67 @@
-// app/store/productSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-}
+export const fetchProducts = createAsyncThunk(
+    'products/fetchProducts',
+    async (page: number) => {
+        const response = await fetch(`https://dummyjson.com/products?skip=${page*9}&limit=9`);
+        const data = await response.json();
+        return data;
+    }
+);
 
-interface ProductState {
-    products: Product[];
-}
+export const deleteProduct = createAsyncThunk<number, number>(
+    'products/deleteProduct',
+    async (productId: number) => {
+        await fetch(`https://dummyjson.com/products/${productId}`, {
+            method: 'DELETE',
+        });
+        return productId;
+    }
+);
 
-const initialState: ProductState = {
-    products: [],
-};
+export const addProduct = createAsyncThunk(
+    'products/addProduct',
+    async (newProduct: any) => {
+        const response = await fetch('https://dummyjson.com/products/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newProduct),
+        });
+        const data = await response.json();
+        return data;
+    }
+);
 
 const productSlice = createSlice({
     name: 'products',
-    initialState,
+    initialState: {
+        items: [],
+        totalPages: 0,
+        currentPage: 1,
+    },
     reducers: {
-        setProducts: (state, action: PayloadAction<Product[]>) => {
-            state.products = action.payload;
+        setPage(state, action) {
+            state.currentPage = action.payload;
         },
-        addProduct: (state, action: PayloadAction<Product>) => {
-            state.products.push(action.payload);
+        setProducts(state, action) {
+            state.items = action.payload;
         },
-        updateProduct: (state, action: PayloadAction<Product>) => {
-            const index = state.products.findIndex(
-                (product) => product.id === action.payload.id
-            );
-            if (index !== -1) {
-                state.products[index] = action.payload;
-            }
-        },
-        deleteProduct: (state, action: PayloadAction<number>) => {
-            state.products = state.products.filter(
-                (product) => product.id !== action.payload
-            );
-        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchProducts.fulfilled, (state, action) => {
+                state.items = action.payload.products;
+                state.totalPages = Math.floor(action.payload.total/9);
+            })
+            .addCase(deleteProduct.fulfilled, (state, action) => {
+                state.items = state.items.filter((product: any) => product.id !== action.payload);
+            })
+            .addCase(addProduct.fulfilled, (state, action) => {
+                state.items.push(action.payload);
+            });
     },
 });
 
-export const { setProducts, addProduct, updateProduct, deleteProduct } = productSlice.actions;
+export const { setPage, setProducts } = productSlice.actions;
+
 export default productSlice.reducer;

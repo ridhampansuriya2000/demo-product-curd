@@ -1,14 +1,15 @@
-// app/store/userSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface UserState {
     fullname: string;
     email: string;
+    isLogin: boolean;
 }
 
 const initialState: UserState = {
     fullname: '',
     email: '',
+    isLogin: false,
 };
 
 const userSlice = createSlice({
@@ -18,10 +19,12 @@ const userSlice = createSlice({
         setUser: (state, action: PayloadAction<UserState>) => {
             state.fullname = action.payload.fullname;
             state.email = action.payload.email;
+            state.isLogin = action.payload.isLogin;
         },
         logoutUser: (state) => {
             state.fullname = '';
             state.email = '';
+            state.isLogin = false;
         },
     },
 });

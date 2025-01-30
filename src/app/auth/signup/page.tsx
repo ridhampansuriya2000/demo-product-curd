@@ -3,80 +3,157 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import {setUser} from "@/store/slice/userSlice";
+import { setUser } from '@/store/slice/userSlice';
+import useValidation from '@/hooks/useValidation';
+import Link from "next/link";
+
+interface SignUpFormData {
+    fullname: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    gender: 'Male' | 'Female' | 'Other';
+    mobile: string;
+}
 
 const SignUp = () => {
-    const [fullname, setFullname] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
+    const [formData, setFormData] = useState<SignUpFormData>({
+        fullname: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        gender: 'Male',
+        mobile: '',
+    });
+
     const dispatch = useDispatch();
     const router = useRouter();
+    const { validateForm, error } = useValidation();
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData((prevState) => ({
+            ...prevState,
+            [name]: value,
+        }));
+    };
+
+    const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prevState) => ({
+            ...prevState,
+            gender: e.target.value as 'Male' | 'Female' | 'Other',
+        }));
+    };
 
     const handleSubmit = () => {
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
+        const { fullname, email, password, confirmPassword, mobile, gender } = formData;
+
+        const { isValid, error } = validateForm(fullname, email, password, confirmPassword, mobile);
+        if (!isValid) {
             return;
         }
-        if (password.length < 8) {
-            setError('Password should be at least 8 characters');
-            return;
-        }
 
-        dispatch(setUser({ fullname, email }));
+        dispatch(setUser({ fullname, email, isLogin: false }));
 
-        // Store data in LocalStorage (or Redux Persist)
-        localStorage.setItem('user', JSON.stringify({ fullname, email }));
+        localStorage.setItem('user', JSON.stringify({ fullname, email, gender, mobile, password }));
 
-        router.push('/login');
+        router.push('/auth/login');
     };
 
     return (
-        <div className="max-w-md mx-auto p-6">
-            <h2 className="text-2xl">Sign Up</h2>
-            <form onSubmit={(e) => e.preventDefault()}>
-                <input
-                    type="text"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                    placeholder="Full Name"
-                    required
-                    className="border p-2 w-full mb-2"
-                />
-                <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    required
-                    className="border p-2 w-full mb-2"
-                />
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    required
-                    className="border p-2 w-full mb-2"
-                />
-                <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
-                    required
-                    className="border p-2 w-full mb-2"
-                />
-                <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="bg-blue-500 text-white p-2 w-full"
-                >
-                    Sign Up
-                </button>
-                {error && <p className="text-red-500 mt-2">{error}</p>}
-            </form>
+        <div className="max-w-md mx-auto p-6 flex justify-center items-center h-screen w-full">
+            <div>
+                <h2 className="text-2xl mb-4">Sign Up</h2>
+                <form onSubmit={(e) => e.preventDefault()}>
+                    <input
+                        type="text"
+                        name="fullname"
+                        value={formData.fullname}
+                        onChange={handleInputChange}
+                        placeholder="Full Name"
+                        required
+                        className="border p-2 w-full mb-2"
+                    />
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                        required
+                        className="border p-2 w-full mb-2"
+                    />
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Password"
+                        required
+                        className="border p-2 w-full mb-2"
+                    />
+                    <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Confirm Password"
+                        required
+                        className="border p-2 w-full mb-2"
+                    />
+                    <div className="mb-2">
+                        <label className="mr-2">Gender:</label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Male"
+                                checked={formData.gender === 'Male'}
+                                onChange={handleGenderChange}
+                            />
+                            Male
+                        </label>
+                        <label className="ml-4">
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Female"
+                                checked={formData.gender === 'Female'}
+                                onChange={handleGenderChange}
+                            />
+                            Female
+                        </label>
+                        <label className="ml-4">
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Other"
+                                checked={formData.gender === 'Other'}
+                                onChange={handleGenderChange}
+                            />
+                            Other
+                        </label>
+                    </div>
+                    <input
+                        type="text"
+                        name="mobile"
+                        value={formData.mobile}
+                        onChange={handleInputChange}
+                        placeholder="Mobile Number"
+                        required
+                        className="border p-2 w-full mb-2"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleSubmit}
+                        className="bg-blue-500 text-white p-2 w-full"
+                    >
+                        Sign Up
+                    </button>
+                    <Link className={'text-blue-500 float-end'} href='/auth/login'>Login</Link>
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                </form>
+            </div>
         </div>
     );
 };
