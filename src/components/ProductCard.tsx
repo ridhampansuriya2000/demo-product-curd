@@ -108,11 +108,6 @@ const ProductCard = ({ product, handleEditeOpenModal }: {
                         View More
                     </button>
                 )}
-                {isExpanded && (
-                    <button onClick={toggleContent} className="text-blue-500 text-sm mt-2">
-                        View Less
-                    </button>
-                )}
                 <div className='flex gap-2'>
                     <button className="bg-red-500 text-white p-2 w-full rounded-lg mt-4"
                             onClick={() => handleOpenModal(setIsConfirmModalOpen)}>Delete Product

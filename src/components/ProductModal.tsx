@@ -94,7 +94,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit }: ProductModalProps)
     };
 
     const handleSubmit = () => {
-        let newErrors: { [key: string]: string } = {};
+        const newErrors: { [key: string]: string } = {};
 
         Object.keys(formData).forEach((key) => {
             const value = (formData as any)[key];
@@ -107,7 +107,7 @@ const ProductModal = ({ isOpen, onClose, product, onSubmit }: ProductModalProps)
             return;
         }
 
-        onSubmit(formData);
+        onSubmit({...formData});
         onClose();
     };
 

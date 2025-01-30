@@ -44,7 +44,7 @@ const Login = () => {
 
     return (
         <div className="max-w-md mx-auto p-6 flex justify-center items-center h-screen w-full">
-            <div className='m-auto'>
+            <div className='m-auto w-full'>
                 <h2 className="text-2xl mb-4">Login</h2>
                 <form onSubmit={(e) => e.preventDefault()}>
                     <input

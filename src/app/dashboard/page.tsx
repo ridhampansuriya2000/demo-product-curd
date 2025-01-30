@@ -62,7 +62,8 @@ const Dashboard = () => {
 
     useEffect(() => {
         dispatch(fetchProducts(currentPage));
-    }, [currentPage]);
+    }, []);
+// }, [currentPage]);   // call api every time when pagination will change
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
@@ -83,8 +84,8 @@ const Dashboard = () => {
             });
             const data = await response.json();
             // Below for do locally because In Real data it will not add, so I add for locally redux
-            // dispatch(setProducts([...products, data]));
-            dispatch(setProducts([data]));
+            dispatch(setProducts([...products, {...data, id : Date.now()}]));
+            // dispatch(setProducts([...products]));
         } catch (error) {
             console.error('Error adding product:', error);
         }
@@ -92,16 +93,21 @@ const Dashboard = () => {
 
     const handleEditProduct = async (product: Product) => {
         try {
+            const updatedProducts = products.map((prod) => // for locally updates data
+                prod.id == product.id ? product : prod
+            );
+            dispatch(setProducts(updatedProducts)); // for locally updates data
             const response = await fetch(`https://dummyjson.com/products/${product.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(product),
             });
             const data = await response.json();
-            const updatedProducts = products.map((prod) =>
-                prod.id === data.id ? data : prod
-            );
-            dispatch(setProducts(updatedProducts));
+            {/** update api is not working so I commented bellow code  */}
+            // const updatedProducts = products.map((prod) =>
+            //     prod.id === data.id ? data : prod
+            // );
+            // dispatch(setProducts(updatedProducts));
         } catch (error) {
             console.error('Error updating product:', error);
         }
@@ -148,8 +154,8 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className="grid grid-cols-3 gap-4 mt-4">
-                {/*{filteredProducts.slice((currentPage - 1) * 9, currentPage * 9).map((product: Product) => (*/}
-                {filteredProducts.map((product: Product) => (
+                {filteredProducts.slice((currentPage - 1) * 9, currentPage * 9).map((product: Product, index) => (
+                // {filteredProducts.map((product: Product) => (
                     <ProductCard
                         key={product.id}
                         product={product}

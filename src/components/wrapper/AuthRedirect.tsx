@@ -17,6 +17,10 @@ const AuthRedirect: React.FC<AuthRedirectProps> = ({ children }) => {
         if (!user.isLogin && pathname !== '/auth/login' && pathname !== '/auth/signup' ) {
             router.push('/auth/login');
         }
+
+        if (user.isLogin && (pathname == '/auth/login' || pathname == '/auth/signup') ) {
+            router.back();
+        }
     }, [user.isLogin, router]);
 
     return <>{children}</>;

@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchProducts = createAsyncThunk(
     'products/fetchProducts',
     async (page: number) => {
-        const response = await fetch(`https://dummyjson.com/products?skip=${page*9}&limit=9`);
+        const response = await fetch(`https://dummyjson.com/products?skip=${0*9}&limit=0`); // if pass page then we can get get data of spacific page
         const data = await response.json();
         return data;
     }
@@ -45,16 +45,19 @@ const productSlice = createSlice({
         },
         setProducts(state, action) {
             state.items = action.payload;
+            state.totalPages = Math.ceil(action.payload.length/9);
         },
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.items = action.payload.products;
-                state.totalPages = Math.floor(action.payload.total/9);
+                state.totalPages = Math.ceil(action.payload.total/9);
             })
             .addCase(deleteProduct.fulfilled, (state, action) => {
-                state.items = state.items.filter((product: any) => product.id !== action.payload);
+                const  newArray = state.items.filter((product) => product.id !== action.payload)
+                state.items = state.items.filter((product) => product.id !== action.payload);
+                state.totalPages = Math.ceil(newArray.length/9);
             })
             .addCase(addProduct.fulfilled, (state, action) => {
                 state.items.push(action.payload);
