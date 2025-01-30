@@ -2,11 +2,29 @@ import { useState } from 'react';
 
 interface ValidationResult {
     isValid: boolean;
-    error: string;
+    error: {
+        fullname: string;
+        email: string;
+        password: string;
+        confirmPassword: string;
+        mobile: string;
+    };
 }
 
 const useValidation = () => {
-    const [error, setError] = useState<string>('');
+    const [error, setError] = useState<{
+        fullname: string;
+        email: string;
+        password: string;
+        confirmPassword: string;
+        mobile: string;
+    }>({
+        fullname: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        mobile: '',
+    });
 
     const validateEmail = (email: string): boolean => {
         const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -14,7 +32,6 @@ const useValidation = () => {
     };
 
     const validatePassword = (password: string): boolean => {
-        // Password must contain at least one uppercase, one lowercase, one number, and one special character.
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:'",.<>?/~`]).{8,}$/;
         return regex.test(password);
     };
@@ -26,30 +43,53 @@ const useValidation = () => {
         confirmPassword: string,
         mobile: string
     ): ValidationResult => {
-        if (!fullname || !email || !password || !confirmPassword || !mobile) {
-            setError('All fields are required');
-            return { isValid: false, error: 'All fields are required' };
+        let isValid = true;
+        const errorMessages = {
+            fullname: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+            mobile: '',
+        };
+
+        if (!fullname) {
+            isValid = false;
+            errorMessages.fullname = 'Full name is required';
         }
-        if (!validateEmail(email)) {
-            setError('Invalid email address');
-            return { isValid: false, error: 'Invalid email address' };
+        if (!email) {
+            isValid = false;
+            errorMessages.email = 'Email is required';
         }
-        if (!validatePassword(password)) {
-            setError(
-                'Password must be at least 8 characters, contain 1 uppercase, 1 lowercase, and 1 special character'
-            );
-            return {
-                isValid: false,
-                error:
-                    'Password must be at least 8 characters, contain 1 uppercase, 1 lowercase, and 1 special character',
-            };
+        if (!password) {
+            isValid = false;
+            errorMessages.password = 'Password is required';
         }
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return { isValid: false, error: 'Passwords do not match' };
+        if (!confirmPassword) {
+            isValid = false;
+            errorMessages.confirmPassword = 'Confirm password is required';
         }
-        setError('');
-        return { isValid: true, error: '' };
+        if (!mobile) {
+            isValid = false;
+            errorMessages.mobile = 'Mobile number is required';
+        }
+
+        if (email && !validateEmail(email)) {
+            isValid = false;
+            errorMessages.email = 'Invalid email address';
+        }
+        if (password && !validatePassword(password)) {
+            isValid = false;
+            errorMessages.password =
+                'Password must be at least 8 characters, contain 1 uppercase, 1 lowercase, and 1 special character';
+        }
+        if (password && confirmPassword && password !== confirmPassword) {
+            isValid = false;
+            errorMessages.confirmPassword = 'Passwords do not match';
+        }
+
+        setError(errorMessages);
+
+        return { isValid, error: errorMessages };
     };
 
     return { validateForm, error };

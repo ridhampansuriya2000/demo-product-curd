@@ -62,7 +62,7 @@ const SignUp = () => {
 
     return (
         <div className="max-w-md mx-auto p-6 flex justify-center items-center h-screen w-full">
-            <div>
+            <div className='w-full'>
                 <h2 className="text-2xl mb-4">Sign Up</h2>
                 <form onSubmit={(e) => e.preventDefault()}>
                     <input
@@ -72,8 +72,9 @@ const SignUp = () => {
                         onChange={handleInputChange}
                         placeholder="Full Name"
                         required
-                        className="border p-2 w-full mb-2"
+                        className="border p-2 w-full mb-1 mt-1"
                     />
+                    {error.fullname && <p className="text-red-500 mb-2">{error.fullname}</p>}
                     <input
                         type="email"
                         name="email"
@@ -81,8 +82,9 @@ const SignUp = () => {
                         onChange={handleInputChange}
                         placeholder="Email"
                         required
-                        className="border p-2 w-full mb-2"
+                        className="border p-2 w-full mb-1 mt-1"
                     />
+                    {error.email && <p className="text-red-500 mb-2">{error.email}</p>}
                     <input
                         type="password"
                         name="password"
@@ -90,8 +92,9 @@ const SignUp = () => {
                         onChange={handleInputChange}
                         placeholder="Password"
                         required
-                        className="border p-2 w-full mb-2"
+                        className="border p-2 w-full mb-1 mt-1"
                     />
+                    {error.password && <p className="text-red-500 mb-2 w-full">{error.password}</p>}
                     <input
                         type="password"
                         name="confirmPassword"
@@ -99,9 +102,10 @@ const SignUp = () => {
                         onChange={handleInputChange}
                         placeholder="Confirm Password"
                         required
-                        className="border p-2 w-full mb-2"
+                        className="border p-2 w-full mb-1 mt-1"
                     />
-                    <div className="mb-2">
+                    {error.confirmPassword && <p className="text-red-500 mb-2">{error.confirmPassword}</p>}
+                    <div className="mb-1 m1-1">
                         <label className="mr-2">Gender:</label>
                         <label>
                             <input
@@ -111,7 +115,7 @@ const SignUp = () => {
                                 checked={formData.gender === 'Male'}
                                 onChange={handleGenderChange}
                             />
-                            Male
+                            &nbsp;Male
                         </label>
                         <label className="ml-4">
                             <input
@@ -121,7 +125,7 @@ const SignUp = () => {
                                 checked={formData.gender === 'Female'}
                                 onChange={handleGenderChange}
                             />
-                            Female
+                            &nbsp;Female
                         </label>
                         <label className="ml-4">
                             <input
@@ -131,9 +135,10 @@ const SignUp = () => {
                                 checked={formData.gender === 'Other'}
                                 onChange={handleGenderChange}
                             />
-                            Other
+                            &nbsp;Other
                         </label>
                     </div>
+                    {/*{error.gender && <p className="text-red-500 mb-2">{error.gender}</p>}*/}
                     <input
                         type="text"
                         name="mobile"
@@ -141,8 +146,9 @@ const SignUp = () => {
                         onChange={handleInputChange}
                         placeholder="Mobile Number"
                         required
-                        className="border p-2 w-full mb-2"
+                        className="border p-2 w-full mb-1"
                     />
+                    {error.mobile && <p className="text-red-500 mb-5">{error.mobile}</p>}
                     <button
                         type="button"
                         onClick={handleSubmit}
@@ -151,7 +157,7 @@ const SignUp = () => {
                         Sign Up
                     </button>
                     <Link className={'text-blue-500 float-end'} href='/auth/login'>Login</Link>
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
+                    {/*{error && <p className="text-red-500 mb-2">{error}</p>}*/}
                 </form>
             </div>
         </div>
